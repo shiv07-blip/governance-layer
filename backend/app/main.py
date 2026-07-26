@@ -69,10 +69,11 @@ app.include_router(authorize.router, tags=["authorization"])
 app.include_router(control.router, tags=["control"])
 
 
-@app.get("/health", tags=["health"])
-async def health() -> dict:
+@app.get("/", tags=["root"])
+async def root() -> dict:
     return {
         "status": "ok",
-        "policy_version": engine.compiled.version if engine.compiled else None,
-        "runtime": runtime.as_dict(),
+        "message": "Governance layer API is running",
+        "health": "/health",
+        "docs": "/docs",
     }
