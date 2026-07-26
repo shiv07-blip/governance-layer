@@ -68,6 +68,9 @@ app.add_middleware(
 app.include_router(authorize.router, tags=["authorization"])
 app.include_router(control.router, tags=["control"])
 
+app.include_router(authorize.router, tags=["authorization"])
+app.include_router(control.router, tags=["control"])
+
 
 @app.get("/", tags=["root"])
 async def root() -> dict:
@@ -77,3 +80,12 @@ async def root() -> dict:
         "health": "/health",
         "docs": "/docs",
     }
+
+
+@app.get("/health", tags=["health"])
+async def health() -> dict:
+    return {
+        "status": "ok",
+        "service": "governance-layer",
+    }
+
