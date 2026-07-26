@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: governance-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: CORS_ORIGINS
+        value: https://governance-web.onrender.com
+      - key: SEED_DEMO_DATA
+        value: "1"
+      - key: SEED_DECISIONS
+        value: "400"
+      - key: FLEET_DAILY_CAP
+        value: "50000000"
+
+  - type: web
+    name: governance-web
+    runtime: docker
+    dockerfilePath: ./web/Dockerfile
+    dockerContext: ./web
+    plan: free
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        value: https://governance-api.onrender.com
