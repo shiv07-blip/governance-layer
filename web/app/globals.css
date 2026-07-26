@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { background: #0A0D13; color-scheme: dark; }
+  body { @apply bg-app text-text font-sans antialiased; }
+
+  /* Figures line up in columns wherever they are compared. */
+  .num, th, td { font-variant-numeric: tabular-nums; }
+
+  :focus-visible { outline: 2px solid #3B82F6; outline-offset: 2px; border-radius: 6px; }
+  ::selection { background: #3B82F640; }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #222A36; border-radius: 6px; border: 2px solid #0A0D13; }
+  ::-webkit-scrollbar-thumb:hover { background: #2E3742; }
+}
+
+@layer components {
+  .card    { @apply rounded-card border border-line bg-surface shadow-card; }
+  .card-hi { @apply rounded-card border border-line bg-surfaceHi; }
+
+  .label { @apply text-label font-medium uppercase text-faint; }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-ctl px-3.5 py-2
+           text-xs2 font-medium transition-colors
+           disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  .btn-ghost          { @apply btn border border-line text-soft hover:border-lineHi hover:text-text; }
+  .btn-primary        { @apply btn bg-info text-white hover:bg-info/85; }
+  .btn-danger         { @apply btn bg-bad text-white hover:bg-bad/85; }
+  .btn-danger-outline { @apply btn border border-bad/45 text-bad hover:bg-badDim; }
+  .btn-ok-outline     { @apply btn border border-ok/45 text-ok hover:bg-okDim; }
+
+  .pill { @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-label font-semibold uppercase; }
+  .tag  { @apply inline-flex items-center rounded-md px-2 py-0.5 text-label font-semibold uppercase; }
+
+  .field {
+    @apply w-full rounded-ctl border border-line bg-inset px-3 py-2 text-xs2 text-text
+           placeholder:text-faint focus:border-info/70 focus:outline-none;
+  }
+  select.field {
+    @apply cursor-pointer appearance-none bg-no-repeat pr-8;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2367727F' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-size: 14px;
+    background-position: right 0.6rem center;
+  }
+  /* The native picker icon is near-black on a dark field otherwise. */
+  input[type='datetime-local']::-webkit-calendar-picker-indicator {
+    filter: invert(0.62); cursor: pointer;
+  }
+
+  .th { @apply whitespace-nowrap px-4 py-3 text-left text-label font-semibold uppercase text-faint; }
+  .td { @apply px-4 py-3 text-xs2 text-soft; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

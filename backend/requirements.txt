@@ -1,0 +1,10 @@
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.4
+PyYAML==6.0.2
+httpx==0.28.1
+
+# Optional. The service runs without any of these and reports the degraded mode
+# on /health; install them to use Postgres, Redis and an OPA sidecar.
+asyncpg==0.30.0
+redis==5.2.1

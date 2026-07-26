@@ -1,0 +1,59 @@
+# Agent authority. All money values are in cents.
+#
+# Each agent gets the narrowest grant that lets it finish its job. Anything an
+# agent is not explicitly given, it does not have.
+
+agents:
+  - id: agent_fee_reversal_001
+    type: fee_reversal
+    max_single_transaction: 500000        # $5,000
+    max_daily_spend: 10000000             # $100,000
+    allowed_actions: [approve_refund, escalate]
+    allowed_categories:
+      - annual_fee
+      - late_fee
+      - account_fee
+
+  - id: agent_fee_reversal_002
+    type: fee_reversal
+    max_single_transaction: 150000        # $1,500 — newer agent, tighter leash
+    max_daily_spend: 3000000              # $30,000
+    allowed_actions: [approve_refund]
+    allowed_categories:
+      - late_fee
+
+  - id: agent_dispute_001
+    type: dispute_resolver
+    max_single_transaction: 1000000       # $10,000
+    max_daily_spend: 20000000             # $200,000
+    requires_dual_control_above: 750000   # $7,500 goes to a human
+    allowed_actions: [approve_claim, escalate]
+    allowed_categories:
+      - all
+
+  - id: agent_dispute_002
+    type: dispute_resolver
+    max_single_transaction: 400000        # $4,000
+    max_daily_spend: 8000000              # $80,000
+    allowed_actions: [approve_claim, escalate]
+    allowed_categories:
+      - chargeback
+      - merchant_dispute
+
+  - id: agent_claim_001
+    type: claim_processor
+    max_single_transaction: 1500000       # $15,000
+    max_daily_spend: 15000000             # $150,000
+    requires_dual_control_above: 1200000  # $12,000
+    allowed_actions: [approve_claim]
+    allowed_categories:
+      - travel
+      - purchase
+      - warranty
+
+# A ceiling per agent type, above the individual agents. Stops a whole class of
+# agent running away even when each member is inside its own budget.
+type_daily_caps:
+  fee_reversal: 12000000                  # $120,000
+  dispute_resolver: 25000000              # $250,000
+  claim_processor: 15000000               # $150,000

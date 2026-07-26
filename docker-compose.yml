@@ -1,0 +1,83 @@
+# Full mode: real Postgres, Redis and an OPA sidecar.
+#
+# The service runs without any of this (see the README). Compose exists to prove
+# the same code path works against the real dependencies, and to make the
+# degraded-mode banner in the UI flip to green.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: governance
+      POSTGRES_PASSWORD: governance
+      POSTGRES_DB: governance
+    ports: ['5432:5432']
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U governance -d governance']
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    # appendonly so a restart does not hand the fleet its whole daily budget back.
+    command: redis-server --appendonly yes
+    ports: ['6379:6379']
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  opa:
+    image: openpolicyagent/opa:0.70.0-static
+    # Started with no policy of its own. The control plane uploads both the
+    # rule module and the agent config, so there is exactly one owner of what
+    # OPA evaluates. Preloading the module here would conflict with that upload.
+    command:
+      - run
+      - --server
+      - --addr=0.0.0.0:8181
+      - --log-level=error
+    ports: ['8181:8181']
+    healthcheck:
+      # The static image has no shell and no curl, so probe with OPA itself.
+      test: ['CMD', '/opa', 'eval', '--server-addr=http://localhost:8181', '1']
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql://governance:governance@postgres:5432/governance
+      REDIS_URL: redis://redis:6379
+      OPA_URL: http://opa:8181
+      FLEET_DAILY_CAP: '50000000'
+      SEED_DEMO_DATA: '1'
+      SEED_DECISIONS: '400'
+      CORS_ORIGINS: http://localhost:3000
+    ports: ['8000:8000']
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      opa: { condition: service_healthy }
+
+  web:
+    build:
+      context: ./web
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports: ['3000:3000']
+    depends_on: [api]
+
+volumes:
+  pgdata:
+  redisdata:
